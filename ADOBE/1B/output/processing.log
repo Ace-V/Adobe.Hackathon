@@ -1,0 +1,37 @@
+[2025-07-28 22:55:45,160] [INFO] Ensured output directory exists: ./output
+[2025-07-28 22:55:45,161] [INFO] Loaded input data from input.json
+[2025-07-28 22:55:45,162] [INFO] Initializing DocumentProcessor...
+[2025-07-28 22:55:45,164] [INFO] Use pytorch device_name: cpu
+[2025-07-28 22:55:45,165] [INFO] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2025-07-28 22:55:52,064] [INFO] SentenceTransformer model loaded successfully.
+[2025-07-28 22:55:52,066] [INFO] Starting input processing pipeline...
+[2025-07-28 22:55:52,066] [INFO] Challenge Info: {'challenge_id': 'round_1b_002', 'test_case_name': 'travel_planner', 'description': 'France Travel'}
+[2025-07-28 22:55:52,067] [INFO] Found 7 documents to process.
+[2025-07-28 22:55:52,072] [INFO] Using semantic context: Travel planning for South of France focusing on gastronomy and historical sites
+[2025-07-28 22:55:52,073] [INFO] Processing document: South of France - Cities.pdf
+[2025-07-28 22:55:52,074] [INFO] Attempting to extract content from: South of France - Cities.pdf
+[2025-07-28 22:55:52,308] [INFO] Extracted 14 non-empty pages from South of France - Cities.pdf
+[2025-07-28 22:55:52,310] [INFO] Processing document: South of France - Cuisine.pdf
+[2025-07-28 22:55:52,310] [INFO] Attempting to extract content from: South of France - Cuisine.pdf
+[2025-07-28 22:55:52,354] [INFO] Extracted 8 non-empty pages from South of France - Cuisine.pdf
+[2025-07-28 22:55:52,355] [INFO] Processing document: South of France - History.pdf
+[2025-07-28 22:55:52,355] [INFO] Attempting to extract content from: South of France - History.pdf
+[2025-07-28 22:55:52,404] [INFO] Extracted 12 non-empty pages from South of France - History.pdf
+[2025-07-28 22:55:52,404] [INFO] Processing document: South of France - Restaurants and Hotels.pdf
+[2025-07-28 22:55:52,405] [INFO] Attempting to extract content from: South of France - Restaurants and Hotels.pdf
+[2025-07-28 22:55:52,460] [INFO] Extracted 13 non-empty pages from South of France - Restaurants and Hotels.pdf
+[2025-07-28 22:55:52,462] [INFO] Processing document: South of France - Things to Do.pdf
+[2025-07-28 22:55:52,462] [INFO] Attempting to extract content from: South of France - Things to Do.pdf
+[2025-07-28 22:55:52,508] [INFO] Extracted 12 non-empty pages from South of France - Things to Do.pdf
+[2025-07-28 22:55:52,509] [INFO] Processing document: South of France - Tips and Tricks.pdf
+[2025-07-28 22:55:52,509] [INFO] Attempting to extract content from: South of France - Tips and Tricks.pdf
+[2025-07-28 22:55:52,557] [INFO] Extracted 9 non-empty pages from South of France - Tips and Tricks.pdf
+[2025-07-28 22:55:52,558] [INFO] Processing document: South of France - Traditions and Culture.pdf
+[2025-07-28 22:55:52,559] [INFO] Attempting to extract content from: South of France - Traditions and Culture.pdf
+[2025-07-28 22:55:52,594] [INFO] Extracted 5 non-empty pages from South of France - Traditions and Culture.pdf
+[2025-07-28 22:55:52,594] [INFO] Computing semantic similarity scores for 73 blocks...
+[2025-07-28 22:55:55,104] [INFO] Semantic similarity scores computed successfully.
+[2025-07-28 22:55:55,104] [INFO] Ranked blocks by semantic relevance.
+[2025-07-28 22:55:55,105] [INFO] Processing completed in 3.04 seconds.
+[2025-07-28 22:55:55,107] [INFO] Final output written successfully.
+[2025-07-28 22:55:55,107] [INFO] Output saved to output\output.json

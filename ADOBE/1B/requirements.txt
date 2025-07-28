@@ -2,4 +2,3 @@ sentence-transformers
 pymupdf
 numpy
 scikit-learn
-tqdm
