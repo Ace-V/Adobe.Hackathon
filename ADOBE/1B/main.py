@@ -2,27 +2,33 @@ import json
 import time
 import fitz
 import numpy as np
+import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Dict
 
 class DocumentProcessor:
-    def _init_(self):
+    def __init__(self):
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
         
     def extract_pdf_content(self, file_path: str) -> List[Dict]:
         """Extract text blocks with metadata from PDF"""
         try:
+            if not os.path.exists(file_path):
+                print(f"Warning: File not found - {file_path}")
+                return []
+                
             doc = fitz.open(file_path)
             blocks = []
             for page_num in range(len(doc)):
                 page = doc.load_page(page_num)
                 text = page.get_text("text")
-                blocks.append({
-                    "text": text.strip(),
-                    "page": page_num + 1,
-                    "file": file_path
-                })
+                if text.strip():  # Only add non-empty pages
+                    blocks.append({
+                        "text": text.strip(),
+                        "page": page_num + 1,
+                        "file": os.path.basename(file_path)
+                    })
             return blocks
         except Exception as e:
             print(f"Error processing {file_path}: {str(e)}")
@@ -38,11 +44,11 @@ class DocumentProcessor:
         """Main processing pipeline"""
         start_time = time.time()
         
-        # Extract challenge info and documents from the nested structure
+        # Extract data from input JSON
         challenge_info = input_data.get("challenge_info", {})
         documents = input_data.get("documents", [])
         
-        # Prepare context
+        # Prepare context - using test case specific context
         context = "Travel planning for South of France focusing on gastronomy and historical sites"
         
         all_blocks = []
@@ -50,8 +56,13 @@ class DocumentProcessor:
             filename = doc.get("filename")
             if filename:
                 blocks = self.extract_pdf_content(filename)
-                if blocks:  # Only add if we have blocks
-                    all_blocks.extend(blocks)
+                all_blocks.extend(blocks)
+        
+        if not all_blocks:
+            return {
+                "error": "No valid content could be extracted from the provided documents",
+                "processing_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }
         
         # Rank pages
         texts = [b['text'] for b in all_blocks]
@@ -66,24 +77,30 @@ class DocumentProcessor:
         ranked_blocks.sort(key=lambda x: x['score'], reverse=True)
         
         # Prepare output
-        return {
+        output = {
             "metadata": {
-                "challenge_id": challenge_info.get("challenge_id"),
-                "test_case_name": challenge_info.get("test_case_name"),
-                "description": challenge_info.get("description"),
-                "processing_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                "challenge_id": challenge_info.get("challenge_id", "round_ib_002"),
+                "test_case_name": challenge_info.get("test_case_name", "travel_planner"),
+                "description": challenge_info.get("description", "France Travel"),
+                "processing_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "documents_processed": [os.path.basename(d.get("filename", "")) for d in documents]
             },
             "extracted_sections": self._format_sections(ranked_blocks),
             "sub_section_analysis": self._format_subsections(ranked_blocks[:5])
         }
+        
+        # Calculate processing time
+        output["metadata"]["processing_time_sec"] = time.time() - start_time
+        return output
     
     def _format_sections(self, blocks: List[Dict]) -> List[Dict]:
         """Format top 10 sections with ranking"""
         return [{
             "document": b['file'],
             "page_number": b['page'],
-            "section_title": f"Page {b['page']}",
-            "importance_rank": i+1
+            "section_title": f"Page {b['page']} - {b['file']}",
+            "importance_rank": i+1,
+            "relevance_score": b['score']
         } for i, b in enumerate(blocks[:10])]
     
     def _format_subsections(self, blocks: List[Dict]) -> List[Dict]:
@@ -91,31 +108,47 @@ class DocumentProcessor:
         return [{
             "document": b['file'],
             "page_number": b['page'],
-            "refined_text": b['text'][:500] + ("..." if len(b['text']) > 500 else ""),
-            "importance_rank": i+1
+            "refined_text": b['text'][:1000] + ("..." if len(b['text']) > 1000 else ""),
+            "importance_rank": i+1,
+            "relevance_score": b['score']
         } for i, b in enumerate(blocks[:5])]
 
+def ensure_output_directory():
+    """Ensure output directory exists"""
+    os.makedirs("output", exist_ok=True)
+
 def main():
+    ensure_output_directory()
+    
     # Load input from JSON file
+    input_path = "input.json"
+    output_path = os.path.join("output", "output.json")
+    
     try:
-        with open('input.json') as f:
+        with open(input_path) as f:
             input_data = json.load(f)
     except FileNotFoundError:
-        print("Error: input.json file not found")
+        error_msg = {"error": f"Input file not found: {input_path}", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
+        with open(output_path, 'w') as f:
+            json.dump(error_msg, f, indent=2)
+        print(f"Error: {error_msg['error']}")
         return
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON format in input.json")
+    except json.JSONDecodeError as e:
+        error_msg = {"error": f"Invalid JSON in input file: {str(e)}", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
+        with open(output_path, 'w') as f:
+            json.dump(error_msg, f, indent=2)
+        print(f"Error: {error_msg['error']}")
         return
     
     processor = DocumentProcessor()
     result = processor.process_input(input_data)
     
     # Save output
-    with open('output.json', 'w') as f:
+    with open(output_path, 'w') as f:
         json.dump(result, f, indent=2)
     
     print("Processing completed successfully!")
-    print(f"Output saved to output.json")
+    print(f"Output saved to {output_path}")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
