@@ -5,6 +5,7 @@ import numpy as np
 import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List, Dict, Any
 
 class DocumentProcessor:
     def _init_(self):
@@ -32,6 +33,10 @@ class DocumentProcessor:
         except Exception as e:
             print(f"Error processing {file_path}: {str(e)}")
             return []
+            return blocks
+        except Exception as e:
+            print(f"Error processing {file_path}: {str(e)}")
+            return []
 
     def semantic_rank(self, query: str, texts: list) -> np.ndarray:
         """Rank texts by similarity to query"""
@@ -51,6 +56,11 @@ class DocumentProcessor:
         
         # Extract text from all PDFs
         all_blocks = []
+        for doc in documents:
+            filename = doc.get("filename")
+            if filename:
+                blocks = self.extract_pdf_content(filename)
+                all_blocks.extend(blocks)
         for doc in documents:
             filename = doc.get("filename")
             if filename:
